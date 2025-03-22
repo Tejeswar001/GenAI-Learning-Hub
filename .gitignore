@@ -1,1 +1,8 @@
 node_modules
+<<<<<<< HEAD
+=======
+.next
+.env
+out
+.DS_Store
+>>>>>>> 7e9fbc2 (updated)
