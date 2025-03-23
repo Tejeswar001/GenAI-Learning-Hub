@@ -97,7 +97,16 @@ export default function Home() {
           font-size: 14px;
           color: #666;
         }
-      `}</style>
+
+        .background-shape {
+            display: none; /* Hidden by default */
+        }
+
+        .signin-page .background-shape {
+            display: block; /* Show only on sign-in page */
+        }
+      `}
+      </style>
     </main>
   );
 }

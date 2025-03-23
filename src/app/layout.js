@@ -28,14 +28,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-import { usePathname } from "next/navigation";
-
-const pathname = usePathname();
-
-return (
-  <>
-    {pathname === "/signin" && (
-      <div className="background-shape"></div> // Only renders on signin page
-    )}
-  </>
-);
