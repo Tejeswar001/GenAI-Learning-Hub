@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { auth, googleProvider , githubProvider } from "@/firebaseConfig";
+import { useRouter } from "next/navigation";
+
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
