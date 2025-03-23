@@ -73,6 +73,14 @@ const SignIn = () => {
     }
   };
 
+  const handleGithubSignIn = async () => {
+    try {
+      await signInWithPopup(auth, githubProvider);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -162,7 +170,7 @@ const SignIn = () => {
                   <a href="#" className="social-icon" onClick={handleGoogleSignIn}>
                     <img src="/google.svg" className="social-icon" alt="Google" />
                   </a>
-                  <a href="#" className="social-icon">
+                  <a href="#" className="social-icon" onClick={handleGithubSignIn}>
                     <img src="/github.svg" className="social-icon" alt="GitHub" />
                   </a>
                 </div>
