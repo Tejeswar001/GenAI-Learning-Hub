@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider } from "@/firebaseConfig";
+import { auth, googleProvider , githubProvider } from "@/firebaseConfig";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
