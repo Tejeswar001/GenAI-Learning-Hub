@@ -105,6 +105,10 @@ export default function Home() {
         .signin-page .background-shape {
             display: block; /* Show only on sign-in page */
         }
+
+        .container: before {
+        background-image: linear-gradient(-45deg, #4481eb, #04befe);
+        }
       `}
       </style>
     </main>
