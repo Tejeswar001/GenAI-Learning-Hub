@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { auth, googleProvider , githubProvider } from "@/firebaseConfig";
-import { useRouter } from "next/navigation";
-
+import { auth, googleProvider, githubProvider } from "@/firebaseConfig";
+import { useRouter } from "next/navigation"; // Import useRouter
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -16,6 +15,7 @@ const SignIn = () => {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter(); // ✅ Call useRouter inside the component
 
   useEffect(() => {
     const signInBtn = document.querySelector("#sign-in-btn");
@@ -53,6 +53,7 @@ const SignIn = () => {
     e.preventDefault();
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      router.push("/home"); // ✅ Redirect after sign-up
     } catch (error) {
       alert(error.message);
     }
@@ -62,6 +63,7 @@ const SignIn = () => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      router.push("/home"); // ✅ Redirect after sign-in
     } catch (error) {
       alert(error.message);
     }
@@ -70,6 +72,7 @@ const SignIn = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
+      router.push("/home"); // ✅ Redirect after Google sign-in
     } catch (error) {
       alert(error.message);
     }
@@ -78,33 +81,21 @@ const SignIn = () => {
   const handleGithubSignIn = async () => {
     try {
       await signInWithPopup(auth, githubProvider);
+      router.push("/home"); // ✅ Redirect after GitHub sign-in
     } catch (error) {
       alert(error.message);
     }
   };
 
-  const router = useRouter(); // Initialize router
-
-  handleSignIn = async (e) => {
-    e.preventDefault();
+  const handleSignOut = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/home"); // Redirect after sign-in
+      await signOut(auth);
+      setUser(null);
+      router.push("/"); // ✅ Redirect to home page after sign-out
     } catch (error) {
       alert(error.message);
     }
   };
-  
-  handleSignUp = async (e) => {
-    e.preventDefault();
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push("/home"); // Redirect after sign-up
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-  
 
   return (
     <div className="container">
@@ -150,7 +141,7 @@ const SignIn = () => {
                   <a href="#" className="social-icon" onClick={handleGoogleSignIn}>
                     <img src="/google.svg" className="social-icon" alt="Google" />
                   </a>
-                  <a href="#" className="social-icon">
+                  <a href="#" className="social-icon" onClick={handleGithubSignIn}>
                     <img src="/github.svg" className="social-icon" alt="GitHub" />
                   </a>
                 </div>
