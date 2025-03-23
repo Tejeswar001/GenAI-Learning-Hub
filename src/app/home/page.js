@@ -107,7 +107,7 @@ export default function Home() {
         }
 
         .container: before {
-        background-image: linear-gradient(-45deg, #4481eb, #04befe);
+        background-image: block;
         }
       `}
       </style>
