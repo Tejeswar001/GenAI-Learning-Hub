@@ -81,13 +81,28 @@ const SignIn = () => {
     }
   };
 
-  const handleSignOut = async () => {
+  const router = useRouter(); // Initialize router
+
+  handleSignIn = async (e) => {
+    e.preventDefault();
     try {
-      await signOut(auth);
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push("/home"); // Redirect after sign-in
     } catch (error) {
       alert(error.message);
     }
   };
+  
+  handleSignUp = async (e) => {
+    e.preventDefault();
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      router.push("/home"); // Redirect after sign-up
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+  
 
   return (
     <div className="container">
