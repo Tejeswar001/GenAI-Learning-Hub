@@ -131,9 +131,7 @@ export default function ChatbotPage() {
       //const responseContent = await generateGeminiResponse(content, apiKey);
       // Initialize Gemini SDK (only once, ideally at the top of your file)
       // Initialize Gemini SDK
-      const genAI = new GoogleGenerativeAI(
-        "AIzaSyCUDq-RkGBDVVn7ocS2FuMXIcajst4B1SM"
-      );
+      const genAI = new GoogleGenerativeAI(apiKey);
 
       // Function to get Gemini response
       async function getGeminiResponse(content: string): Promise<string> {
