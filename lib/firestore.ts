@@ -61,7 +61,6 @@ export async function createChatSession(userId: string, title: string): Promise<
     return chatSessionRef.id
   } catch (error) {
     console.error("Firestore error creating chat session:", error)
-    // Return a local fallback ID
     return `local-${Date.now()}`
   }
 }
@@ -71,16 +70,14 @@ export async function addChatMessage(
   message: Omit<ChatMessage, "id" | "timestamp">,
 ): Promise<string> {
   try {
-    // Add the message
-    const messageRef = await addDoc(collection(db, "chatMessages"), {
+    // Add message to subcollection
+    const messageRef = await addDoc(collection(db, "chatSessions", sessionId, "messages"), {
       ...message,
-      sessionId, // Make sure sessionId is included
       timestamp: serverTimestamp(),
     })
 
-    // Update the session with last message and count
+    // Update session
     if (!sessionId.startsWith("local-")) {
-      // Only try to update if it's a real Firestore session
       try {
         const sessionRef = doc(db, "chatSessions", sessionId)
         const sessionDoc = await getDoc(sessionRef)
@@ -98,14 +95,12 @@ export async function addChatMessage(
         }
       } catch (sessionError) {
         console.error("Error updating session data:", sessionError)
-        // Continue even if session update fails
       }
     }
 
     return messageRef.id
   } catch (error) {
     console.error("Firestore error adding chat message:", error)
-    // Return a local fallback ID
     return `local-msg-${Date.now()}`
   }
 }
@@ -126,7 +121,10 @@ export async function getChatSessions(userId: string): Promise<ChatSession[]> {
 }
 
 export async function getChatMessages(sessionId: string): Promise<ChatMessage[]> {
-  const q = query(collection(db, "chatMessages"), where("sessionId", "==", sessionId), orderBy("timestamp", "asc"))
+  const q = query(
+    collection(db, "chatSessions", sessionId, "messages"),
+    orderBy("timestamp", "asc"),
+  )
 
   const querySnapshot = await getDocs(q)
   return querySnapshot.docs.map((doc) => ({
@@ -194,7 +192,6 @@ export async function getUserStats(userId: string): Promise<UserStats | null> {
   return null
 }
 
-// Helper function to increment specific stat
 export async function incrementUserStat(
   userId: string,
   statName: "totalChatSessions" | "totalVideosGenerated",
@@ -222,7 +219,5 @@ export async function incrementUserStat(
     }
   } catch (error) {
     console.error(`Error incrementing ${statName}:`, error)
-    // Silently fail but log the error
   }
 }
-

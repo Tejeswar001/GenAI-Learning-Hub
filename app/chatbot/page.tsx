@@ -16,8 +16,9 @@ import {
   createChatSession,
   incrementUserStat,
 } from "@/lib/firestore";
-import { getGeminiModel } from "@/lib/gemini";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { text } from "stream/consumers";
+//import { generateGeminiResponse } from "@/lib/gemini";
 
 type Message = {
   id: string;
@@ -50,6 +51,7 @@ export default function ChatbotPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { apiKey } = useGeminiApi(); // Moved inside the component
 
   useEffect(() => {
     // Redirect if not authenticated
@@ -90,6 +92,7 @@ export default function ChatbotPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Update the handleSendMessage function to use the Gemini API
   const handleSendMessage = async (content: string = input) => {
     if (!content.trim() || !user) return;
 
@@ -119,21 +122,75 @@ export default function ChatbotPage() {
         }
       }
 
-      // Simulate API call to AI service
-      // TODO: Replace with actual Gemini API call
-      //const gemini = new GoogleGenerativeAI(content);
-      const model = getGeminiModel(content); // from input or context
-      const result = await model.generateContent(content);
-      const responseContent = result.response.text();
+      // Use the Gemini API to generate a response
+      if (!apiKey) {
+        throw new Error("API key not found");
+      }
 
+      // Call the Gemini API
+      //const responseContent = await generateGeminiResponse(content, apiKey);
+      // Initialize Gemini SDK (only once, ideally at the top of your file)
+      // Initialize Gemini SDK
+      const genAI = new GoogleGenerativeAI(
+        "AIzaSyCUDq-RkGBDVVn7ocS2FuMXIcajst4B1SM"
+      );
+
+      // Function to get Gemini response
+      async function getGeminiResponse(content: string): Promise<string> {
+        try {
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          const result = await model.generateContent(
+            "output must only contain normal text and not bold **** or any also make it brief and short ,so now the question is" +
+              content
+          );
+          const response = await result.response;
+          const text = await response.text();
+          return text || "No response from Gemini.";
+        } catch (error) {
+          console.error("Gemini API Error:", error);
+          return "Error getting response from Gemini.";
+        }
+      }
+
+      // Later in your code, when you need to get the response:
+      const replyText = await getGeminiResponse(content); // <- this was missing
+
+      // Use replyText in your message
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: responseContent,
+        content: replyText,
         role: "assistant",
         timestamp: new Date(),
       };
+
+      // Try to save assistant message to Firestore, but continue even if it fails
+      if (sessionId) {
+        try {
+          await addChatMessage(sessionId, {
+            userId: user.uid,
+            content: replyText,
+            role: "assistant",
+          });
+        } catch (error) {
+          console.error("Error saving assistant message to Firestore:", error);
+          // Continue with local functionality even if Firestore fails
+        }
+      }
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error sending message:", error);
+
+      // Add an error message
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content:
+          "Sorry, I encountered an error processing your request. Please try again.",
+        role: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
       setIsLoading(false);
     }
   };
